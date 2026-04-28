@@ -49,7 +49,7 @@ module.exports = async (req, res) => {
     
     // Prepare payload for Lipila API
     const payload = {
-      callbackUrl: callbackUrl || 'https://your-domain.com/api/lipila-webhook',
+      callbackUrl: callbackUrl || 'https://cato-pay.vercel.app/api/lipila-webhook',
       referenceId: referenceId,
       amount: parseFloat(amount),
       narration: narration || 'Payment via Lipila',
