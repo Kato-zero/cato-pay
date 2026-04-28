@@ -435,7 +435,7 @@
     
     try {
       // Step 1: Create payment via our API proxy
-      const response = await fetch(`${API_BASE}/lipila-webhook`, {
+      const response = await fetch(`${API_BASE}/pay`, {
         method: "POST",
         headers: {
           "Content-Type": "application/json"
