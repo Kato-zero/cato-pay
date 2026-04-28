@@ -6,7 +6,7 @@ const crypto = require('crypto');
 // IMPORTANT: Set your Lipila API key in Vercel environment variables
 // Go to Vercel Dashboard > Your Project > Settings > Environment Variables
 // Add key: LIPILA_API_KEY with your actual API key
-const LIPILA_API_KEY = process.env.LIPILA_API_KEY || 'lsk_019ab490-99b7-72c7-8bfa-23cce0bacf68';
+const LIPILA_API_KEY = process.env.LIPILA_API_KEY || 'YOUR_API_KEY_HERE';
 
 // Generate UUID v4
 function generateUUID() {
@@ -38,7 +38,7 @@ module.exports = async (req, res) => {
     }
     
     // Validate API key
-    if (!LIPILA_API_KEY || LIPILA_API_KEY === 'lsk_019ab490-99b7-72c7-8bfa-23cce0bacf68') {
+    if (!LIPILA_API_KEY || LIPILA_API_KEY === 'YOUR_API_KEY_HERE') {
       console.error('Lipila API key not configured');
       return res.status(500).json({ 
         error: 'Payment service not configured. Please set LIPILA_API_KEY environment variable.' 
@@ -67,7 +67,7 @@ module.exports = async (req, res) => {
       method: 'POST',
       headers: {
         'accept': 'application/json',
-        'x-api-key': lsk_019ab490-99b7-72c7-8bfa-23cce0bacf68,
+        'x-api-key': LIPILA_API_KEY,
         'Content-Type': 'application/json'
       },
       body: JSON.stringify(payload)
