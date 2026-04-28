@@ -1,0 +1,528 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0, user-scalable=yes">
+  <title>Lipila Mobile Money Checkout</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      box-sizing: border-box;
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Helvetica, Arial, sans-serif;
+    }
+
+    body {
+      background: linear-gradient(145deg, #e9eff5 0%, #dce3ec 100%);
+      min-height: 100vh;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      padding: 1.5rem;
+    }
+
+    .checkout-container {
+      max-width: 560px;
+      width: 100%;
+      background: #ffffff;
+      border-radius: 2rem;
+      box-shadow: 0 25px 45px -12px rgba(0, 0, 0, 0.25), 0 4px 12px rgba(0, 0, 0, 0.05);
+      overflow: hidden;
+      transition: all 0.2s ease;
+    }
+
+    .checkout-header {
+      background: #0b2b3b;
+      padding: 1.75rem 2rem;
+      color: white;
+    }
+
+    .checkout-header h1 {
+      font-size: 1.8rem;
+      font-weight: 600;
+      letter-spacing: -0.3px;
+      display: flex;
+      align-items: center;
+      gap: 0.5rem;
+    }
+
+    .checkout-header h1:before {
+      content: "💳";
+      font-size: 1.7rem;
+    }
+
+    .checkout-header p {
+      font-size: 0.9rem;
+      opacity: 0.8;
+      margin-top: 0.5rem;
+    }
+
+    .checkout-body {
+      padding: 2rem 2rem 1.8rem;
+    }
+
+    .form-group {
+      margin-bottom: 1.35rem;
+    }
+
+    label {
+      display: block;
+      font-weight: 600;
+      font-size: 0.85rem;
+      margin-bottom: 0.45rem;
+      color: #1e2f3e;
+      letter-spacing: -0.2px;
+    }
+
+    label .required {
+      color: #e03a3a;
+      margin-left: 3px;
+    }
+
+    input, select {
+      width: 100%;
+      padding: 0.85rem 1rem;
+      border: 1.5px solid #e2e8f0;
+      border-radius: 1rem;
+      font-size: 1rem;
+      background: #fefefe;
+      transition: all 0.2s;
+      outline: none;
+      color: #0f172a;
+    }
+
+    input:focus, select:focus {
+      border-color: #2c7a47;
+      box-shadow: 0 0 0 3px rgba(44, 122, 71, 0.2);
+    }
+
+    .row-2col {
+      display: flex;
+      gap: 1rem;
+      flex-wrap: wrap;
+    }
+
+    .row-2col .form-group {
+      flex: 1;
+      min-width: 120px;
+    }
+
+    .amount-hint {
+      font-size: 0.7rem;
+      color: #4b6a7c;
+      margin-top: 0.25rem;
+    }
+
+    .payment-summary {
+      background: #f8fafc;
+      border-radius: 1.2rem;
+      padding: 1rem 1.2rem;
+      margin: 1.5rem 0 1rem;
+      border: 1px solid #eef2f6;
+    }
+
+    .summary-row {
+      display: flex;
+      justify-content: space-between;
+      margin-bottom: 0.55rem;
+      font-size: 0.9rem;
+    }
+
+    .summary-row.total {
+      border-top: 1px dashed #cbd5e1;
+      margin-top: 0.6rem;
+      padding-top: 0.6rem;
+      font-weight: 800;
+      font-size: 1.1rem;
+    }
+
+    .pay-btn {
+      background: #0f3b2c;
+      background: linear-gradient(105deg, #0f3b2c 0%, #1e5a3e 100%);
+      width: 100%;
+      border: none;
+      padding: 1rem;
+      border-radius: 3rem;
+      font-weight: 700;
+      font-size: 1.1rem;
+      color: white;
+      cursor: pointer;
+      transition: all 0.2s ease;
+      display: flex;
+      align-items: center;
+      justify-content: center;
+      gap: 10px;
+      margin-top: 0.6rem;
+      box-shadow: 0 6px 14px rgba(0, 32, 32, 0.2);
+    }
+
+    .pay-btn:hover:not(:disabled) {
+      background: linear-gradient(105deg, #0a2f22 0%, #164d34 100%);
+      transform: translateY(-2px);
+      box-shadow: 0 12px 20px -8px rgba(0, 0, 0, 0.3);
+    }
+
+    .pay-btn:disabled {
+      opacity: 0.7;
+      cursor: not-allowed;
+      transform: none;
+    }
+
+    .status-message {
+      margin-top: 1.4rem;
+      padding: 0.9rem;
+      border-radius: 1.2rem;
+      font-size: 0.85rem;
+      display: none;
+      align-items: center;
+      gap: 0.6rem;
+      font-weight: 500;
+    }
+
+    .status-message.error {
+      background: #fee9e6;
+      color: #b91c1c;
+      border-left: 5px solid #e53e3e;
+      display: flex;
+    }
+
+    .status-message.success {
+      background: #e3f7ec;
+      color: #0a5c2e;
+      border-left: 5px solid #2e7d32;
+      display: flex;
+    }
+
+    .status-message.pending {
+      background: #fff0db;
+      color: #b45f06;
+      border-left: 5px solid #f5a623;
+      display: flex;
+    }
+
+    .spinner {
+      width: 20px;
+      height: 20px;
+      border: 2px solid rgba(255, 255, 255, 0.3);
+      border-radius: 50%;
+      border-top-color: white;
+      animation: spin 0.8s linear infinite;
+      display: inline-block;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+
+    .footer-note {
+      margin-top: 1.2rem;
+      text-align: center;
+      font-size: 0.7rem;
+      color: #5c6f87;
+      padding: 0 0.5rem;
+    }
+
+    .payment-history {
+      margin-top: 1.5rem;
+      padding-top: 1rem;
+      border-top: 1px solid #e9edf2;
+    }
+
+    .payment-history h4 {
+      font-size: 0.85rem;
+      color: #2c5f8a;
+      margin-bottom: 0.5rem;
+    }
+
+    .payment-history ul {
+      list-style: none;
+      font-size: 0.75rem;
+      color: #4a627a;
+    }
+
+    .payment-history li {
+      padding: 0.25rem 0;
+      display: flex;
+      justify-content: space-between;
+    }
+
+    hr {
+      margin: 0.8rem 0;
+      border: 0;
+      height: 1px;
+      background: #e9edf2;
+    }
+  </style>
+</head>
+<body>
+
+<div class="checkout-container" id="checkoutRoot">
+  <div class="checkout-header">
+    <h1>Lipila Pay</h1>
+    <p>Mobile money checkout • Airtel / MTN (ZMW)</p>
+  </div>
+  <div class="checkout-body">
+    <form id="paymentForm">
+      <div class="form-group">
+        <label>Mobile Money Account (Phone number) <span class="required">*</span></label>
+        <input type="tel" id="accountNumber" placeholder="260XXXXXXXXX" value="260972643310" required>
+        <div class="amount-hint">Format: 260xxxxxxxx (Zambia)</div>
+      </div>
+
+      <div class="row-2col">
+        <div class="form-group">
+          <label>Amount (ZMW) <span class="required">*</span></label>
+          <input type="number" id="amount" step="0.01" min="1" value="5" required>
+        </div>
+        <div class="form-group">
+          <label>Currency</label>
+          <select id="currency">
+            <option value="ZMW" selected>ZMW - Zambian Kwacha</option>
+          </select>
+        </div>
+      </div>
+
+      <div class="form-group">
+        <label>Narration / Reason</label>
+        <input type="text" id="narration" placeholder="e.g., payment for bread, shopping" value="payment for bread">
+      </div>
+
+      <div class="form-group">
+        <label>Email (for receipt)</label>
+        <input type="email" id="email" placeholder="customer@example.com" value="demo@lipila.test">
+      </div>
+
+      <div class="payment-summary">
+        <div class="summary-row">
+          <span>Subtotal</span>
+          <span id="summaryAmount">ZMW 5.00</span>
+        </div>
+        <div class="summary-row total">
+          <span>Total to pay</span>
+          <span id="summaryTotal">ZMW 5.00</span>
+        </div>
+      </div>
+
+      <button type="submit" class="pay-btn" id="submitPaymentBtn">
+        <span>💸</span> Pay with Mobile Money
+      </button>
+    </form>
+
+    <div id="statusMessage" class="status-message"></div>
+    
+    <div class="payment-history" id="paymentHistory" style="display: none;">
+      <h4>📋 Recent Payments</h4>
+      <ul id="historyList"></ul>
+    </div>
+    
+    <div class="footer-note">
+      🔒 Secure payment processing • Powered by Lipila API
+    </div>
+  </div>
+</div>
+
+<script>
+  // Payment Checkout System
+  const API_BASE = '/api'; // Vercel serverless functions
+  
+  // Store payment history in localStorage
+  let paymentHistory = JSON.parse(localStorage.getItem('lipila_payments') || '[]');
+  
+  function updateSummary() {
+    let amountVal = parseFloat(document.getElementById('amount').value);
+    if (isNaN(amountVal) || amountVal < 0) amountVal = 0;
+    const formatted = `ZMW ${amountVal.toFixed(2)}`;
+    document.getElementById('summaryAmount').innerText = formatted;
+    document.getElementById('summaryTotal').innerText = formatted;
+  }
+  
+  document.getElementById('amount').addEventListener('input', updateSummary);
+  updateSummary();
+  
+  function showStatus(message, type = 'error') {
+    const statusDiv = document.getElementById('statusMessage');
+    statusDiv.className = `status-message ${type}`;
+    statusDiv.innerHTML = `
+      <span>${type === 'error' ? '⚠️' : type === 'success' ? '✅' : '🔄'}</span>
+      <span>${message}</span>
+    `;
+    statusDiv.style.display = 'flex';
+    setTimeout(() => {
+      if (type === 'success') {
+        setTimeout(() => {
+          statusDiv.style.display = 'none';
+        }, 5000);
+      }
+    }, 3000);
+  }
+  
+  function hideStatus() {
+    const statusDiv = document.getElementById('statusMessage');
+    statusDiv.style.display = 'none';
+  }
+  
+  function setLoading(isLoading) {
+    const submitBtn = document.getElementById('submitPaymentBtn');
+    if (isLoading) {
+      submitBtn.disabled = true;
+      submitBtn.innerHTML = '<div class="spinner"></div> Processing...';
+    } else {
+      submitBtn.disabled = false;
+      submitBtn.innerHTML = '<span>💸</span> Pay with Mobile Money';
+    }
+  }
+  
+  function addToHistory(payment) {
+    paymentHistory.unshift(payment);
+    if (paymentHistory.length > 5) paymentHistory.pop();
+    localStorage.setItem('lipila_payments', JSON.stringify(paymentHistory));
+    displayHistory();
+  }
+  
+  function displayHistory() {
+    const historyDiv = document.getElementById('paymentHistory');
+    const historyList = document.getElementById('historyList');
+    
+    if (paymentHistory.length === 0) {
+      historyDiv.style.display = 'none';
+      return;
+    }
+    
+    historyDiv.style.display = 'block';
+    historyList.innerHTML = paymentHistory.map(p => `
+      <li>
+        <span>${p.referenceId.slice(0, 8)}...</span>
+        <span>${p.amount} ${p.currency}</span>
+        <span style="color: ${p.status === 'Success' ? '#2e7d32' : '#b45f06'}">${p.status}</span>
+      </li>
+    `).join('');
+  }
+  
+  displayHistory();
+  
+  async function handlePaymentSubmit(event) {
+    event.preventDefault();
+    hideStatus();
+    
+    const accountNumber = document.getElementById('accountNumber').value.trim();
+    const amountRaw = document.getElementById('amount').value;
+    const currency = document.getElementById('currency').value;
+    const narration = document.getElementById('narration').value.trim() || "payment via Lipila";
+    const email = document.getElementById('email').value.trim();
+    
+    if (!accountNumber) {
+      showStatus("❌ Please enter a valid mobile money account number (phone).", "error");
+      return;
+    }
+    
+    if (!accountNumber.match(/^260\d{9}$/)) {
+      showStatus("⚠️ Phone number should start with country code 260 (e.g., 260972643310)", "error");
+      return;
+    }
+    
+    const amountNum = parseFloat(amountRaw);
+    if (isNaN(amountNum) || amountNum <= 0) {
+      showStatus("❌ Amount must be a positive number (minimum 1 ZMW).", "error");
+      return;
+    }
+    
+    if (email && !email.includes('@')) {
+      showStatus("❌ Please provide a valid email address.", "error");
+      return;
+    }
+    
+    setLoading(true);
+    
+    try {
+      // Step 1: Create payment via our API proxy
+      const response = await fetch(`${API_BASE}/lipila-webhook`, {
+        method: "POST",
+        headers: {
+          "Content-Type": "application/json"
+        },
+        body: JSON.stringify({
+          accountNumber,
+          amount: amountNum,
+          currency,
+          narration,
+          email,
+          callbackUrl: `${window.location.origin}/api/lipila-webhook`,
+          redirectUrl: window.location.href,
+          backUrl: window.location.href
+        })
+      });
+      
+      const responseData = await response.json();
+      
+      if (!response.ok) {
+        throw new Error(responseData.error || 'Payment request failed');
+      }
+      
+      // Store payment in history
+      addToHistory({
+        referenceId: responseData.referenceId,
+        amount: amountNum,
+        currency: currency,
+        status: responseData.status || 'Pending',
+        timestamp: new Date().toISOString()
+      });
+      
+      showStatus(
+        `✅ Payment initiated! Status: ${responseData.status || "Pending"}. Reference: ${responseData.referenceId.slice(0, 8)}... ` +
+        `You will receive a confirmation SMS shortly.`,
+        "pending"
+      );
+      
+      // Start polling for payment status
+      if (responseData.referenceId) {
+        pollPaymentStatus(responseData.referenceId);
+      }
+      
+    } catch (error) {
+      console.error("Payment Error:", error);
+      showStatus(`❌ Transaction failed: ${error.message}`, "error");
+    } finally {
+      setLoading(false);
+    }
+  }
+  
+  async function pollPaymentStatus(referenceId, attempts = 0) {
+    if (attempts > 30) return; // Stop after 30 attempts (2.5 minutes)
+    
+    setTimeout(async () => {
+      try {
+        const response = await fetch(`${API_BASE}/verify-payment?referenceId=${referenceId}`);
+        const data = await response.json();
+        
+        if (data.status === 'Success' || data.status === 'Completed') {
+          showStatus(`✅ Payment successful! Reference: ${referenceId.slice(0, 8)}...`, "success");
+          // Update history
+          const payment = paymentHistory.find(p => p.referenceId === referenceId);
+          if (payment) {
+            payment.status = 'Success';
+            localStorage.setItem('lipila_payments', JSON.stringify(paymentHistory));
+            displayHistory();
+          }
+        } else if (data.status === 'Failed') {
+          showStatus(`❌ Payment failed. Please try again.`, "error");
+        } else {
+          // Still pending, poll again
+          pollPaymentStatus(referenceId, attempts + 1);
+        }
+      } catch (error) {
+        console.error('Polling error:', error);
+      }
+    }, 5000); // Poll every 5 seconds
+  }
+  
+  document.getElementById('paymentForm').addEventListener('submit', handlePaymentSubmit);
+  
+  // Phone number formatting
+  document.getElementById('accountNumber').addEventListener('input', function(e) {
+    let val = e.target.value.replace(/\D/g, '');
+    if (val.length > 12) val = val.slice(0,12);
+    e.target.value = val;
+  });
+</script>
+</body>
+</html>
