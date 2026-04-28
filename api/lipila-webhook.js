@@ -77,7 +77,7 @@ module.exports = async (req, res) => {
     });
     
     // Make request to Lipila API
-    const response = await fetch('https://api.lipila.io/api/v1/collections/mobile-money', {
+    const response = await fetch('https://api.lipila.dev/api/v1/collections/mobile-money', {
       method: 'POST',
       headers: {
         'accept': 'application/json',
